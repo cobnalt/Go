@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS Product_properties;
+DROP TABLE IF EXISTS Attribute_values;
+DROP TABLE IF EXISTS Attributes;
 DROP TABLE IF EXISTS Product_images;
-DROP TABLE IF EXISTS Product_category;
 DROP TABLE IF EXISTS Product;
 DROP TABLE IF EXISTS Manufacturers;
 DROP TABLE IF EXISTS Categories;
