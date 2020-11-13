@@ -10,10 +10,13 @@ import (
 
 // Product struct
 type Product struct {
-	ID    int
-	Name  string
-	Slug  string
-	Price float64
+	ID             int
+	ManufacturerID int
+	CategoryID     int
+	Name           string
+	Slug           string
+	Price          float64
+	Description    string
 }
 
 // Database interface
@@ -41,7 +44,7 @@ func New() (*DB, error) {
 
 // GetProducts func
 func (d *DB) GetProducts(ctx context.Context, limit int, offset int) (result []Product, err error) {
-	q := fmt.Sprintf("SELECT id, name, slug, price FROM Product LIMIT %d OFFSET %d;", limit, offset)
+	q := fmt.Sprintf("SELECT id, manufacturer_id, category_id, name, slug, price, description FROM Product LIMIT %d OFFSET %d;", limit, offset)
 	if err = d.conn.SelectContext(ctx, &result, q); err != nil {
 		return nil, err
 	}
@@ -50,7 +53,7 @@ func (d *DB) GetProducts(ctx context.Context, limit int, offset int) (result []P
 
 // GetProductByID func
 func (d *DB) GetProductByID(ctx context.Context, id int) (result Product, err error) {
-	if err := d.conn.Get(&result, "SELECT id, name, slug, price FROM Product WHERE id=$1", id); err != nil {
+	if err := d.conn.Get(&result, "SELECT id, manufacturer_id, category_id, name, slug, price, description FROM Product WHERE id=$1", id); err != nil {
 		// проверка на sql ErrNoRows
 		if err == sql.ErrNoRows {
 			fmt.Errorf("No Rows Error")
@@ -64,7 +67,7 @@ func (d *DB) GetProductByID(ctx context.Context, id int) (result Product, err er
 
 // CreateProduct func
 func (d *DB) CreateProduct(ctx context.Context, pr Product) (int, error) {
-	q := "INSERT INTO Product (name, slug, price) VALUES ($1, $2, $3) returning id;"
+	q := "INSERT INTO Product (name, slug, price) VALUES ($1, $2, $3) RETURNING id;"
 	var id int
 	err := d.conn.GetContext(ctx, &id, q, pr.Name, pr.Slug, pr.Price)
 

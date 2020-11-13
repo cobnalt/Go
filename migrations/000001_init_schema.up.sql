@@ -5,8 +5,7 @@ CREATE TABLE IF NOT EXISTS Product (
   name varchar(100) NOT NULL,
   slug varchar(20) NOT NULL,
   price decimal(12, 2) NOT NULL,
-  description text NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT now()
+  description text NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Attribute_values (

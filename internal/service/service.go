@@ -8,10 +8,13 @@ import (
 
 // Product struct
 type Product struct {
-	ID    int
-	Name  string
-	Slug  string
-	Price float64
+	ID             int
+	ManufacturerID int
+	CategoryID     int
+	Name           string
+	Slug           string
+	Price          float64
+	Description    string
 }
 
 //Database interface
@@ -55,7 +58,15 @@ func (s *Service) GetProducts(ctx context.Context, limit, offset int) (result []
 // GetProductByID func
 func (s *Service) GetProductByID(ctx context.Context, id int) (result Product, err error) {
 	dbProduct, err := s.db.GetProductByID(ctx, id)
-	result.ID, result.Name, result.Price, result.Slug = dbProduct.ID, dbProduct.Name, dbProduct.Price, dbProduct.Slug
+	result = Product{
+		ID:             dbProduct.ID,
+		ManufacturerID: dbProduct.ManufacturerID,
+		CategoryID:     dbProduct.CategoryID,
+		Name:           dbProduct.Name,
+		Slug:           dbProduct.Slug,
+		Price:          dbProduct.Price,
+		Description:    dbProduct.Description,
+	}
 	return result, nil
 }
 
