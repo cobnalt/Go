@@ -30,6 +30,6 @@ func (m *DatabaseMock) GetProducts(ctx context.Context, limit int, offset int) (
 
 // CreateProduct func
 func (m *DatabaseMock) CreateProduct(ctx context.Context, pr Product) (int, error) {
-
-	return 1, nil
+	args := m.Called(ctx, pr)
+	return args.Int(0), args.Error(1)
 }

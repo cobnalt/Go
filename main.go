@@ -1,9 +1,10 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
-
+	"github.com/cobnalt/Go/internal/config"
+	"github.com/cobnalt/Go/internal/database"
+	"github.com/cobnalt/Go/internal/router"
+	"github.com/cobnalt/Go/internal/service"
 	_ "github.com/lib/pq"
 )
 
@@ -13,35 +14,21 @@ type product struct {
 }
 
 func main() {
-	connStr := "user=postgres password=docker dbname=test_base sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
+	cfg, err := config.ReadConfig("configs/config.toml")
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
 
-	//_, err = db.Exec("insert into test_tbl (name) values ('Паша')")
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	rows, err := db.Query("select * from test_tbl")
+	db, err := database.New(cfg.Database)
 	if err != nil {
 		panic(err)
 	}
-	defer rows.Close()
-	products := []product{}
 
-	for rows.Next() {
-		p := product{}
-		err := rows.Scan(&p.id, &p.name)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		products = append(products, p)
+	service, err := service.New(db)
+	if err != nil {
+		panic(err)
 	}
-	for _, p := range products {
-		fmt.Println(p.id, p.name)
-	}
+
+	server := router.New(*service)
+	server.Run()
 }

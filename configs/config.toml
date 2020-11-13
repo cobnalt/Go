@@ -1,0 +1,5 @@
+[server]
+port = 8081
+
+[database]
+connection_string = "postgresql://postgres:postgres@localhost:5432/simple_catalog?sslmode=disable"

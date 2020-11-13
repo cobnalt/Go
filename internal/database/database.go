@@ -2,9 +2,9 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 
+	"github.com/cobnalt/Go/internal/config"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -32,9 +32,11 @@ type DB struct {
 }
 
 // New DB
-func New() (*DB, error) {
-	conn, err := sqlx.Connect("postgres", "postgresql://postgres:postgres@localhost:5432/simple_catalog?sslmode=disable")
+func New(cfg config.DatabaseConfig) (*DB, error) {
+	conn, err := sqlx.Connect("postgres", cfg.ConnectionString)
+
 	if err != nil {
+
 		return nil, err
 	}
 	return &DB{
@@ -53,12 +55,14 @@ func (d *DB) GetProducts(ctx context.Context, limit int, offset int) (result []P
 
 // GetProductByID func
 func (d *DB) GetProductByID(ctx context.Context, id int) (result Product, err error) {
-	if err := d.conn.Get(&result, "SELECT id, manufacturer_id, category_id, name, slug, price, description FROM Product WHERE id=$1", id); err != nil {
+	if err := d.conn.SelectContext(ctx, &result, "SELECT id, manufacturer_id, category_id, name, slug, price, description FROM Product WHERE id=$1", id); err != nil {
 		// проверка на sql ErrNoRows
-		if err == sql.ErrNoRows {
-			fmt.Errorf("No Rows Error")
-		} else {
-			return result, err
+		// if err == sql.ErrNoRows {
+		// 	fmt.Println("No Rows Error")
+		// 	return result, nil
+		// }
+		if err != nil {
+			fmt.Println(err)
 		}
 
 	}
