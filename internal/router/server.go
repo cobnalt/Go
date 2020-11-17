@@ -3,7 +3,6 @@ package router
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -28,7 +27,7 @@ func New(service service.Service) *Server {
 // Run server
 func (s *Server) Run() {
 	s.initHandlers()
-	err := http.ListenAndServe("localhost:8181", nil)
+	err := http.ListenAndServe("localhost:8181", s.router)
 	if err != nil {
 		fmt.Println("Error Server Run")
 	}
@@ -51,8 +50,16 @@ func (s *Server) GetProductByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	pr, err := s.service.GetProductByID(r.Context(), id)
+	fmt.Println(err)
 	if err != nil {
-		log.Fatal(err)
+		if err == service.ErrNotFound {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		return
 	}
+	fmt.Println(pr)
 	json.NewEncoder(w).Encode(&pr)
 }

@@ -2,6 +2,8 @@ package database
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/cobnalt/Go/internal/config"
@@ -10,13 +12,13 @@ import (
 
 // Product struct
 type Product struct {
-	ID             int
-	ManufacturerID int
-	CategoryID     int
-	Name           string
-	Slug           string
-	Price          float64
-	Description    string
+	ID             int     `db:"id"`
+	ManufacturerID int     `db:"manufacturer_id"`
+	CategoryID     int     `db:"category_id"`
+	Name           string  `db:"name"`
+	Slug           string  `db:"slug"`
+	Price          float64 `db:"price"`
+	Description    string  `db:"description"`
 }
 
 // Database interface
@@ -25,6 +27,8 @@ type Database interface {
 	GetProductByID(ctx context.Context, id int) (result Product, err error)
 	CreateProduct(ctx context.Context, pr Product) (id int, err error)
 }
+
+var ErrNotFound = errors.New("Not found")
 
 // DB connect
 type DB struct {
@@ -55,15 +59,14 @@ func (d *DB) GetProducts(ctx context.Context, limit int, offset int) (result []P
 
 // GetProductByID func
 func (d *DB) GetProductByID(ctx context.Context, id int) (result Product, err error) {
-	if err := d.conn.SelectContext(ctx, &result, "SELECT id, manufacturer_id, category_id, name, slug, price, description FROM Product WHERE id=$1", id); err != nil {
-		// проверка на sql ErrNoRows
-		// if err == sql.ErrNoRows {
-		// 	fmt.Println("No Rows Error")
-		// 	return result, nil
-		// }
-		if err != nil {
-			fmt.Println(err)
+	err = d.conn.GetContext(ctx, &result, "SELECT id, manufacturer_id, category_id, name, slug, price, description FROM Product WHERE id=$1", id)
+	if err != nil {
+
+		if err == sql.ErrNoRows {
+			fmt.Println("this err no rows ", err)
+			return Product{}, ErrNotFound
 		}
+		return Product{}, err
 
 	}
 	return result, nil

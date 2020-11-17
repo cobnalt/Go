@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/cobnalt/Go/internal/database"
 )
@@ -23,6 +25,8 @@ type Database interface {
 	GetProductByID(ctx context.Context, id int) (result database.Product, err error)
 	CreateProduct(ctx context.Context, pr database.Product) (id int, err error)
 }
+
+var ErrNotFound = errors.New("Not found")
 
 //Service struct
 type Service struct {
@@ -58,6 +62,14 @@ func (s *Service) GetProducts(ctx context.Context, limit, offset int) (result []
 // GetProductByID func
 func (s *Service) GetProductByID(ctx context.Context, id int) (result Product, err error) {
 	dbProduct, err := s.db.GetProductByID(ctx, id)
+	if err != nil {
+		if err == database.ErrNotFound {
+			fmt.Println("not found")
+			return Product{}, ErrNotFound
+		}
+		fmt.Println("error service")
+		return Product{}, err
+	}
 	result = Product{
 		ID:             dbProduct.ID,
 		ManufacturerID: dbProduct.ManufacturerID,
